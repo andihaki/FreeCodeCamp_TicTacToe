@@ -6,6 +6,7 @@ import CalculateWinner from "../components/CalculateWinner";
 class Board extends React.Component {
   state = {
     squares: Array(9).fill(null),
+    // squares: Array.from(Array(9).keys()),
     xIsPlaying: true
   };
 
@@ -16,10 +17,24 @@ class Board extends React.Component {
       return;
     }
     squares[i] = this.state.xIsPlaying ? "X" : "O";
+    this.setState(
+      {
+        squares,
+        xIsPlaying: !this.state.xIsPlaying
+      },
+      () => this.aiTurn(i, this.state)
+    );
+  }
+
+  aiTurn(i, { squares, xIsPlaying }) {
+    // const emptySquare = squares.filter((s, index) => s === null);
+    const emptySquare = squares.indexOf(null);
+    squares[emptySquare] = "O";
     this.setState({
-      squares,
-      xIsPlaying: !this.state.xIsPlaying
+      squares: squares,
+      xIsPlaying: !xIsPlaying
     });
+    console.log(i, xIsPlaying, squares, emptySquare);
   }
 
   renderSquare(i) {
@@ -32,7 +47,7 @@ class Board extends React.Component {
   }
 
   render() {
-    // ganti text 'Now Playing' ke 'Winner'
+    // ganti text 'Now Playing' ke 'Winner' / 'draw'
     const winner = CalculateWinner(this.state.squares);
     let status;
     const emptySquare = this.state.squares.includes(null);
