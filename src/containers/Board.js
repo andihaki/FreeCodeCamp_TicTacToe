@@ -3,33 +3,25 @@ import React from "react";
 import Square from "../components/Square";
 import CalculateWinner from "../components/CalculateWinner";
 
-const huPlayer = "X";
-const aiPlayer = "O";
-const winCombos = [
-  [0, 1, 2],
-  [3, 4, 5],
-  [6, 7, 8],
-  [0, 3, 6],
-  [1, 4, 7],
-  [2, 5, 8],
-  [0, 4, 8],
-  [2, 4, 6]
-];
-
 class Board extends React.Component {
   state = {
     squares: Array(9).fill(null),
+    // availSpots: Array(9).fill(null),
     // squares: Array.from(Array(9).keys()),
-    xIsPlaying: true
+    xIsPlaying: true,
+    score: 0
   };
 
   shouldComponentUpdate(nextProps, nextState) {
+    console.log("shoulComponentUpdate", !nextState.xIsPlaying);
+    let { squares, xIsPlaying } = nextState;
     if (!nextState.xIsPlaying) {
-      this.aiTurn(0, nextState);
-      // let { squares, xIsPlaying } = nextState;
-      // return this.minimax(squares, xIsPlaying);
+      // console.log(availSpots);
+      this.minimax(squares, xIsPlaying);
+      return true;
     }
-    return !nextState.xIsPlaying;
+    return false;
+    // return !nextState.xIsPlaying;
   }
 
   handleClick(i) {
@@ -41,80 +33,56 @@ class Board extends React.Component {
     squares[i] = this.state.xIsPlaying ? "X" : "O";
     this.setState(
       {
-        squares,
-        xIsPlaying: !this.state.xIsPlaying
+        squares: squares,
+        xIsPlaying: !this.state.xIsPlaying,
+        availSpots: this.state.squares.filter(s => s !== "X" && s !== "O")
       }
       // ,
       // () => {
       //   // return this.aiTurn(i, this.state);
-      //   let { squares, xIsPlaying } = this.state;
-      //   return this.minimax(squares, xIsPlaying);
+      //   let { squares, xIsPlaying, availSpots } = this.state;
+      //   return this.minimax(squares, xIsPlaying, availSpots);
       // }
     );
   }
 
-  aiTurn(i, { squares, xIsPlaying }) {
-    // const emptySquare = squares.filter((s, index) => s === null);
-    const emptySquare = squares.indexOf(null);
-    squares[emptySquare] = "O";
-    this.setState({
-      squares: squares,
-      xIsPlaying: !xIsPlaying
-    });
-    // console.log(i, xIsPlaying, squares, emptySquare);
-  }
+  // aiTurn(i, { squares, xIsPlaying }) {
+  //   // const emptySquare = squares.filter((s, index) => s === null);
+  //   const emptySquare = squares.indexOf(null);
+  //   squares[emptySquare] = "O";
+  //   this.setState({
+  //     squares: squares,
+  //     xIsPlaying: !xIsPlaying
+  //   });
+  //   // console.log(i, xIsPlaying, squares, emptySquare);
+  // }
 
   minimax(newBoard, player) {
-    // var availSpots = emptySquares(newBoard);
-    console.log(newBoard);
-    let availSpots = newBoard.filter(s => s !== "O" && s !== "X");
+    const availSpots = newBoard.filter(s => s !== "O" && s !== "X");
+    const emptySquare = newBoard.indexOf(null);
+    newBoard[emptySquare] = "O";
 
-    const checkWin = CalculateWinner(newBoard);
-    if (checkWin && !player) {
-      return { score: -10 };
-    } else if (checkWin && player) {
-      return { score: 10 };
-    } else if (availSpots.length === 0) {
-      return { score: 0 };
-    }
-
-    var moves = [];
-    for (var i = 0; i < availSpots.length; i++) {
-      var move = {};
-      move.index = newBoard[availSpots[i]];
-      newBoard[availSpots[i]] = player;
-
-      if (player === aiPlayer) {
-        var result = this.minimax(newBoard, huPlayer);
-        move.score = result.score;
-      } else {
-        var result = this.minimax(newBoard, aiPlayer);
-        move.score = result.score;
-      }
-
-      newBoard[availSpots[i]] = move.index;
-      moves.push(move);
-    }
-
-    var bestMove;
-    if (player === aiPlayer) {
-      var bestScore = -10000;
-      for (var i = 0; i < moves.length; i++) {
-        if (moves[i].score > bestScore) {
-          bestScore = moves[i].score;
-          bestMove = i;
-        }
-      }
+    // if (checkWin(newBoard, huPlayer)) {
+    //   return { score: -10 };
+    // } else if (checkWin(newBoard, aiPlayer)) {
+    //   return { score: 10 };
+    // } else if (availSpots.length === 0) {
+    //   return { score: 0 };
+    // }
+    const winner = CalculateWinner(newBoard);
+    if (winner) {
+      this.setState({ score: -10 });
+    } else if (!winner && availSpots.length > 0) {
+      this.setState({ score: 10 });
     } else {
-      var bestScore = 10000;
-      for (var i = 0; i < moves.length; i++) {
-        if (moves[i].score < bestScore) {
-          bestScore = moves[i].score;
-          bestMove = i;
-        }
-      }
+      this.setState({ score: 0 });
     }
-    return moves[bestMove];
+
+    console.log(newBoard, availSpots, this.state.score, winner);
+    this.setState({
+      squares: newBoard,
+      xIsPlaying: !player
+    });
   }
 
   renderSquare(i) {
