@@ -20,14 +20,14 @@ class Board extends React.Component {
   }
 
   shouldComponentUpdate(nextProps, nextState) {
-    console.log("shoulComponentUpdate", !nextState.xIsPlaying);
-    let { squares, xIsPlaying } = this.copyState(nextState);
+    console.log("shoulComponentUpdate", !nextState.xIsPlaying, nextState.squares, this.state.squares);
+    let { squares } = this.copyState(nextState);
     if (!nextState.xIsPlaying && nextState.squares !== this.state.squares) {
       // console.log(availSpots);
       // this.minimax(squares, xIsPlaying);
       let aiStep = this.findAiMove(squares);
       squares[aiStep] = "O";
-      this.setState({ squares: squares });
+      this.setState({ squares: squares, xIsPlaying: !nextState.xIsPlaying });
       return true;
     }
     return false;
@@ -127,14 +127,12 @@ class Board extends React.Component {
       return 0;
     } else {
       var bestMoveValue = 100;
-      let move = 0;
       for (var i = 0; i < board.length; i++) {
         var newBoard = this.validMove(i, this.state.minPlayer, board);
         if (newBoard) {
           var predictedMoveValue = this.maxScore(newBoard);
           if (predictedMoveValue < bestMoveValue) {
             bestMoveValue = predictedMoveValue;
-            move = i;
           }
         }
       }
@@ -153,14 +151,12 @@ class Board extends React.Component {
       return 0;
     } else {
       let bestMoveValue = -100;
-      let move = 0;
       for (let i = 0; i < board.length; i++) {
         let newBoard = this.validMove(i, this.state.maxPlayer, board);
         if (newBoard) {
           let predictedMoveValue = this.minScore(newBoard);
           if (predictedMoveValue > bestMoveValue) {
             bestMoveValue = predictedMoveValue;
-            move = i;
           }
         }
       }
