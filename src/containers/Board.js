@@ -3,11 +3,14 @@ import React from "react";
 import Square from "../components/Square";
 import CalculateWinner from "../components/CalculateWinner";
 
+/*
+todo:
+1. remove CalculateWinner => bug kalo diklik x yang sama, O nya nambah tanpa X
+*/
+
 class Board extends React.Component {
   state = {
     squares: Array(9).fill(null),
-    // availSpots: Array(9).fill(null),
-    // squares: Array.from(Array(9).keys()),
     xIsPlaying: true,
     score: 0,
     maxPlayer: "X",
@@ -44,7 +47,6 @@ class Board extends React.Component {
     this.setState({
       squares: squares,
       xIsPlaying: !this.state.xIsPlaying,
-      availSpots: this.state.squares.filter(s => s !== "X" && s !== "O")
     });
   }
 
@@ -101,18 +103,22 @@ class Board extends React.Component {
     if (this.winner(board, "X") || this.winner(board, "O" || this.tie(board))) {
       return null;
     }
+    // const winner = CalculateWinner(this.state.squares);
+    // const emptySquare = this.state.squares.includes(null);
+    // if (winner || !emptySquare) {
+    //   return null;
+    // }
 
     for (let i = 0; i < board.length; i++) {
       let newBoard = this.validMove(i, this.state.minPlayer, board);
       //If validMove returned a valid game board
-      // console.log("findAiMove", newBoard);
       if (newBoard) {
         let moveScore = this.maxScore(newBoard);
         if (moveScore < bestMoveScore) {
           bestMoveScore = moveScore;
           move = i;
         }
-      }
+      }      
     }
     return move;
   }
@@ -177,42 +183,7 @@ class Board extends React.Component {
 
   // https://codepen.io/shoesandsocks/pen/evwgVZ
   // https://www.neverstopbuilding.com/blog/minimax
-  // minimax(newBoard, player) {
-  //   const availSpots = newBoard.filter(s => s !== "O" && s !== "X");
-  //   const emptySquare = newBoard.indexOf(null);
-  //   newBoard[emptySquare] = "O";
-  //   // const winner = CalculateWinner(newBoard);
-  //   // if (winner) {
-  //   //   this.setState({ score: -10 });
-  //   // } else if (!winner && availSpots.length > 0) {
-  //   //   this.setState({ score: 10 });
-  //   // } else {
-  //   //   this.setState({ score: 0 });
-  //   // }
-
-  //   // -- http://douglasberg.com/blog/react/tic-tac-toe/ai/minimax/algorithm/2016/08/29/react-tictactoe-part-2.html
-  //   let bestMoveScore = 100;
-  //   let move = null;
-  //   //Test Every Possible Move if the game is not already over.
-  //   const winner = CalculateWinner(newBoard);
-  //   if (winner || !emptySquare) {
-  //     return null;
-  //   }
-
-  //   // looping kemungkinan posisi
-  //   for (let i = 0; i < newBoard.length; i++) {
-  //     // ada yg diilangin nih, please check kalo error
-  //     // let newBoard = validMove(i, minPlayer, board);
-  //     let moveScore = this.maxScore(newBoard);
-  //   }
-
-  //   console.log(newBoard, availSpots, this.state.score);
-  //   this.setState({
-  //     squares: newBoard,
-  //     xIsPlaying: !player
-  //   });
-  // }
-
+  
   renderSquare(i) {
     return (
       <Square
@@ -224,15 +195,17 @@ class Board extends React.Component {
 
   render() {
     // ganti text 'Now Playing' ke 'Winner' / 'draw'
-    const winner = CalculateWinner(this.state.squares);
+    let player = this.state.xIsPlaying ? this.state.maxPlayer : this.state.minPlayer;
+    const winner = this.winner(this.state.squares, player);
+    // const winner = CalculateWinner(this.state.squares);
     let status;
     const emptySquare = this.state.squares.includes(null);
     if (winner) {
-      status = "Winner: " + winner;
+      status = "Winner: " + player;
     } else if (!winner && !emptySquare) {
       status = "It's Draw";
     } else {
-      status = "Now Playing: " + (this.state.xIsPlaying ? "X" : "O");
+      status = "Now Playing: " + player;
     }
 
     return (

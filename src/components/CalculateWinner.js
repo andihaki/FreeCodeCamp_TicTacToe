@@ -9,15 +9,15 @@ let CalculateWinner = squares => {
     [0, 4, 8],
     [2, 4, 6]
   ];
-  let result = null;
+  let result = false; //null;
   lines.map(row => {
     const [a, b, c] = row;
     if (squares[a] && squares[a] === squares[b] && squares[a] === squares[c]) {
-      result = squares[a];
+    // if (squares[b] === squares[c] && squares[a] === squares[b] && squares[a] === squares[c]) {
+      result = true; //squares[a];
     }
     return result;
-  });
-  return result;
+  });  
 };
 
 export default CalculateWinner;
